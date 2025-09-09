@@ -22,6 +22,10 @@ encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
 
       avaliacoes = this.avaliarGatos(avaliacoes);
 
+      if (animaisAvaliados.includes("Loco")) {
+        avaliacoes = this.avaliarLoco(avaliacoes, listaBrinquedos1, listaBrinquedos2);
+      }
+
       const adocao = avaliacoes.map(this.avaliacaoFinal);
 
       return { lista: adocao.sort() };
@@ -79,6 +83,22 @@ encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
     return avaliacoes;
   }
 
+  avaliarLoco(avaliacoes, brinquedosPessoa1, brinquedosPessoa2) {
+    const avaliacaoLoco = avaliacoes.find(a => a.nome === "Loco");
+    
+    // Para cada pessoa
+    ["pessoa1", "pessoa2"].forEach(pessoa => {
+        // Avalia se há outros animais, além de Loco
+        const companhia = avaliacoes.filter(a => a.nome !== "Loco" && a[pessoa]);
+        // Caso não  haja outros animais, realiza nova avaliação de compatibilidade considerando ordem dos brinquedos
+        if (companhia.length === 0) {
+          const brinquedosPessoa = pessoa === "pessoa1" ? brinquedosPessoa1 : brinquedosPessoa2;
+          avaliacaoLoco[pessoa] = this.brinquedosNaOrdem(avaliacaoLoco.brinquedos, brinquedosPessoa);
+        }
+      });
+
+    return avaliacoes;
+  }
 
   avaliacaoFinal(avaliacao) {
     const { nome, pessoa1, pessoa2 } = avaliacao;

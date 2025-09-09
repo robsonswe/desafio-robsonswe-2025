@@ -20,6 +20,8 @@ encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
         this.avaliacaoInicial(nomeAnimal, listaBrinquedos1, listaBrinquedos2)
       );
 
+      avaliacoes = this.avaliarGatos(avaliacoes);
+
       const adocao = avaliacoes.map(this.avaliacaoFinal);
 
       return { lista: adocao.sort() };
@@ -39,6 +41,7 @@ encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
           return {
               nome,
               raça: animal.raça,
+              brinquedos: animal.brinquedos,
               pessoa1: this.temTodosBrinquedos(animal.brinquedos, brinquedosPessoa1),
               pessoa2: this.temTodosBrinquedos(animal.brinquedos, brinquedosPessoa2)
           };
@@ -47,9 +50,33 @@ encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
       return {
           nome,
           raça: animal.raça,
+          brinquedos: animal.brinquedos,
           pessoa1: this.brinquedosNaOrdem(animal.brinquedos, brinquedosPessoa1),
           pessoa2: this.brinquedosNaOrdem(animal.brinquedos, brinquedosPessoa2)
       };
+  }
+
+  avaliarGatos(avaliacoes) {
+    // Para cada pessoa
+    ["pessoa1", "pessoa2"].forEach(pessoa => {
+      // Filtra os gatos adotados por esta pessoa
+      const gatos = avaliacoes.filter(a => a.raça === "gato" && a[pessoa]);
+      
+      // Filtra todos os outros animais adotados por esta pessoa
+      const outros = avaliacoes.filter(a => a.raça !== "gato" && a[pessoa]);
+
+      // Para cada gato, verifica se há outros com mesmo brinquedo
+      gatos.forEach(gato => {
+        const conflito = outros.some(animal => 
+          animal.brinquedos.some(b => gato.brinquedos.includes(b))
+        );
+        if (conflito) {
+          gato[pessoa] = false; // pessoa se torna incompatível com o gato caso haja conflito com outros animais
+        }
+      });
+    });
+
+    return avaliacoes;
   }
 
 

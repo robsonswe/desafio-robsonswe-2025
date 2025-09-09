@@ -11,14 +11,16 @@ class AbrigoAnimais {
     };
   }
 
-  encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
+encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
     try {
       const animaisAvaliados = this.validarAnimais(ordemAnimais);
       const [listaBrinquedos1, listaBrinquedos2] = this.validarBrinquedos(brinquedosPessoa1, brinquedosPessoa2);
 
-      const adocao = animaisAvaliados.map(nomeAnimal =>
-        this.avaliarAdocaoAnimal(nomeAnimal, listaBrinquedos1, listaBrinquedos2)
+      let avaliacoes = animaisAvaliados.map(nomeAnimal =>
+        this.avaliacaoInicial(nomeAnimal, listaBrinquedos1, listaBrinquedos2)
       );
+
+      const adocao = avaliacoes.map(this.avaliacaoFinal);
 
       return { lista: adocao.sort() };
     } catch (erro) {
@@ -30,20 +32,36 @@ class AbrigoAnimais {
     return new Set(lista).size !== lista.length;
   }
 
-  avaliarAdocaoAnimal(nome, brinquedosPessoa1, brinquedosPessoa2) {
-    const animal = this.animais[nome];
-    
-    const pessoa1Compativel = this.brinquedosNaOrdem(animal.brinquedos, brinquedosPessoa1);
-    const pessoa2Compativel = this.brinquedosNaOrdem(animal.brinquedos, brinquedosPessoa2);
+  avaliacaoInicial(nome, brinquedosPessoa1, brinquedosPessoa2) {
+      const animal = this.animais[nome];
 
-    if (pessoa1Compativel && !pessoa2Compativel) {
+      if (nome === "Loco") {
+          return {
+              nome,
+              raça: animal.raça,
+              pessoa1: this.temTodosBrinquedos(animal.brinquedos, brinquedosPessoa1),
+              pessoa2: this.temTodosBrinquedos(animal.brinquedos, brinquedosPessoa2)
+          };
+      }
+
+      return {
+          nome,
+          raça: animal.raça,
+          pessoa1: this.brinquedosNaOrdem(animal.brinquedos, brinquedosPessoa1),
+          pessoa2: this.brinquedosNaOrdem(animal.brinquedos, brinquedosPessoa2)
+      };
+  }
+
+
+  avaliacaoFinal(avaliacao) {
+    const { nome, pessoa1, pessoa2 } = avaliacao;
+
+    if (pessoa1 && !pessoa2) {
       return `${nome} - pessoa 1`;
     }
-    
-    if (pessoa2Compativel && !pessoa1Compativel) {
+    if (pessoa2 && !pessoa1) {
       return `${nome} - pessoa 2`;
     }
-    
     return `${nome} - abrigo`;
   }
 
@@ -100,6 +118,11 @@ class AbrigoAnimais {
 
     return true;
   }
+
+  temTodosBrinquedos(animalBrinquedos, pessoaBrinquedos) {
+    return animalBrinquedos.every(b => pessoaBrinquedos.includes(b));
+  }
+
 }
 
 export { AbrigoAnimais as AbrigoAnimais };

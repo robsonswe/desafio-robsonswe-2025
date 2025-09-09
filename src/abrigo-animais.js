@@ -42,13 +42,13 @@ class AbrigoAnimais {
     
     if (pessoa2Compativel && !pessoa1Compativel) {
       return `${nome} - pessoa 2`;
-    } 
+    }
     
     return `${nome} - abrigo`;
   }
 
   validarAnimais(ordemAnimais) {
-    const animaisAvaliados = ordemAnimais.split(",");
+    const animaisAvaliados = ordemAnimais.trim() === '' ? [] : ordemAnimais.split(",");
 
     if (this.listaDuplicada(animaisAvaliados)) {
       throw new Error("Animal inválido");
@@ -64,8 +64,12 @@ class AbrigoAnimais {
   }
 
   validarBrinquedos(brinquedosPessoa1, brinquedosPessoa2) {
-    const lista1 = brinquedosPessoa1.split(",");
-    const lista2 = brinquedosPessoa2.split(",");
+    const lista1 = brinquedosPessoa1.trim() === '' ? [] : brinquedosPessoa1.split(",");
+    const lista2 = brinquedosPessoa2.trim() === '' ? [] : brinquedosPessoa2.split(",");
+
+    if (lista1.length === 0 && lista2.length === 0) {
+      throw new Error("Brinquedo inválido");
+    }
 
     if (this.listaDuplicada(lista1) || this.listaDuplicada(lista2)) {
       throw new Error("Brinquedo inválido");

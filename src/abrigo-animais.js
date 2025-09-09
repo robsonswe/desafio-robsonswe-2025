@@ -26,6 +26,8 @@ encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
         avaliacoes = this.avaliarLoco(avaliacoes, listaBrinquedos1, listaBrinquedos2);
       }
 
+      avaliacoes = this.avaliarLimite(avaliacoes);
+
       const adocao = avaliacoes.map(this.avaliacaoFinal);
 
       return { lista: adocao.sort() };
@@ -100,13 +102,43 @@ encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
     return avaliacoes;
   }
 
+  avaliarLimite(avaliacoes) {
+    // Se ambas as pessoas podem adotar, o animal fica no abrigo.
+    avaliacoes.forEach(avaliacao => {
+      if (avaliacao.pessoa1 && avaliacao.pessoa2) {
+        avaliacao.pessoa1 = false;
+        avaliacao.pessoa2 = false;
+      }
+    });
+
+    // Limitar a 3 adoções por pessoa, revertendo as últimas da lista.
+    ['pessoa1', 'pessoa2'].forEach(pessoa => {
+      const adocoesParaPessoa = avaliacoes.filter(a => a[pessoa]);
+      let excesso = adocoesParaPessoa.length - 3;
+
+      if (excesso > 0) {
+        // Itera de trás para frente na lista de avaliações para remover os últimos animais da preferência da pessoa.
+        for (let i = avaliacoes.length - 1; i >= 0; i--) {
+          const avaliacao = avaliacoes[i];
+
+          if (excesso > 0 && avaliacao[pessoa]) {
+            avaliacao[pessoa] = false;
+            excesso--;
+          }
+        }
+      }
+    });
+
+    return avaliacoes;
+  }
+
   avaliacaoFinal(avaliacao) {
     const { nome, pessoa1, pessoa2 } = avaliacao;
 
-    if (pessoa1 && !pessoa2) {
+    if (pessoa1) {
       return `${nome} - pessoa 1`;
     }
-    if (pessoa2 && !pessoa1) {
+    if (pessoa2) { 
       return `${nome} - pessoa 2`;
     }
     return `${nome} - abrigo`;

@@ -1,5 +1,4 @@
 class AbrigoAnimais {
-
   constructor() {
     this.animais = {
       Rex:  { raça: "cão",    brinquedos: ["RATO", "BOLA"] },
@@ -13,21 +12,22 @@ class AbrigoAnimais {
   }
 
   encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
-    const animaisAvaliados = ordemAnimais.split(",");
-    const animaisValidos = animaisAvaliados.filter(animal => animal in this.animais);
+    try {
+      const animaisAvaliados = this.validarAnimais(ordemAnimais);
+      const [listaBrinquedos1, listaBrinquedos2] = this.validarBrinquedos(brinquedosPessoa1, brinquedosPessoa2);
 
-    if (animaisValidos.length === 0) {
-      return { erro: "Animal inválido" };
+      const adocao = animaisAvaliados.map(nomeAnimal =>
+        this.avaliarAdocaoAnimal(nomeAnimal, listaBrinquedos1, listaBrinquedos2)
+      );
+
+      return { lista: adocao.sort() };
+    } catch (erro) {
+      return { erro: erro.message };
     }
+  }
 
-    const listaBrinquedos1 = brinquedosPessoa1.split(",");
-    const listaBrinquedos2 = brinquedosPessoa2.split(",");
-
-    const adocao = animaisValidos.map(nomeAnimal => 
-      this.avaliarAdocaoAnimal(nomeAnimal, listaBrinquedos1, listaBrinquedos2)
-    );
-
-    return { lista: adocao.sort() };
+  listaDuplicada(lista) {
+    return new Set(lista).size !== lista.length;
   }
 
   avaliarAdocaoAnimal(nome, brinquedosPessoa1, brinquedosPessoa2) {
@@ -45,6 +45,44 @@ class AbrigoAnimais {
     } 
     
     return `${nome} - abrigo`;
+  }
+
+  validarAnimais(ordemAnimais) {
+    const animaisAvaliados = ordemAnimais.split(",");
+
+    if (this.listaDuplicada(animaisAvaliados)) {
+      throw new Error("Animal inválido");
+    }
+
+    const animaisValidos = animaisAvaliados.filter(animal => animal in this.animais);
+
+    if (animaisValidos.length === 0) {
+      throw new Error("Animal inválido");
+    }
+
+    return animaisValidos;
+  }
+
+  validarBrinquedos(brinquedosPessoa1, brinquedosPessoa2) {
+    const lista1 = brinquedosPessoa1.split(",");
+    const lista2 = brinquedosPessoa2.split(",");
+
+    if (this.listaDuplicada(lista1) || this.listaDuplicada(lista2)) {
+      throw new Error("Brinquedo inválido");
+    }
+
+    const brinquedosAbrigo = new Set(
+      Object.values(this.animais).flatMap(animal => animal.brinquedos)
+    );
+
+    const todosBrinquedos = [...lista1, ...lista2];
+    for (const brinquedo of todosBrinquedos) {
+      if (!brinquedosAbrigo.has(brinquedo)) {
+        throw new Error("Brinquedo inválido");
+      }
+    }
+
+    return [lista1, lista2];
   }
 
   brinquedosNaOrdem(animalBrinquedos, pessoaBrinquedos) {
